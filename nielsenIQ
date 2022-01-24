@@ -1,0 +1,126 @@
+{
+  "nbformat": 4,
+  "nbformat_minor": 0,
+  "metadata": {
+    "colab": {
+      "name": "Untitled0.ipynb",
+      "provenance": [],
+      "collapsed_sections": [],
+      "include_colab_link": true
+    },
+    "kernelspec": {
+      "name": "python3",
+      "display_name": "Python 3"
+    },
+    "language_info": {
+      "name": "python"
+    }
+  },
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "view-in-github",
+        "colab_type": "text"
+      },
+      "source": [
+        "<a href=\"https://colab.research.google.com/github/rhemish/FreeCodeCamp-Pandas-Real-Life-Example/blob/master/nielsenIQ\" target=\"_parent\"><img src=\"https://colab.research.google.com/assets/colab-badge.svg\" alt=\"Open In Colab\"/></a>"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "id": "M59c8R7doVMR"
+      },
+      "outputs": [],
+      "source": [
+        "import warnings\n",
+        "\n",
+        "warnings.filterwarnings(\"ignore\")\n",
+        "import pandas as pd\n",
+        "import numpy as np\n",
+        "from sklearn import linear_model\n",
+        "from sklearn.linear_model import LinearRegression\n",
+        "from sklearn.linear_model import ElasticNet\n",
+        "\n",
+        "from sklearn.linear_model import Ridge, RidgeCV, Lasso, LassoCV\n",
+        "\n",
+        "\n",
+        "def regression(data_train,data_test):\n",
+        "\n",
+        "  x_train = data_train.iloc[:, data_train.columns!='price'].values\n",
+        "  y_train = data_train.iloc[:, -1].values\n",
+        "\n",
+        "  x_test = data_test.iloc[:, data_test.columns!='price'].values\n",
+        "  y_test = data_test.iloc[:, -1].values\n",
+        "\n",
+        "  regressor = LinearRegression()\n",
+        "  regressor.fit(x_train, y_train)\n",
+        "\n",
+        "  \n",
+        "  y_pred = regressor.predict(x_test)\n",
+        "  Y_pred = regressor.predict(x_train)\n",
+        "\n",
+        "  alphas = 10**np.linspace(-4,-1,4)*0.5\n",
+        "\n",
+        "  #===========For Ridges=====================\n",
+        "  ridge = Ridge(normalize = True)\n",
+        "  coefs_ridge = []\n",
+        "\n",
+        "  #sample generate pred with alpha of 4\n",
+        "  ridge = Ridge(alpha = 4, normalize = True)\n",
+        "  ridge.fit(x_train, y_train)        \n",
+        "  pred = ridge.predict(x_test)\n",
+        "\n",
+        "  #generating pred for each alpha values\n",
+        "  for a in alphas:\n",
+        "    ridge.set_params(alpha = a)\n",
+        "    ridge.fit(x_train, y_train)\n",
+        "    pred_ridge = ridge.predict(x_test)\n",
+        "    coefs_ridge.append(ridge.coef_)\n",
+        "\n",
+        "  \n",
+        "  #==================For LASSO======================\n",
+        "  lasso = Lasso(max_iter = 10000, normalize = True)\n",
+        "  coefs_lasso = []\n",
+        "\n",
+        "  for a in alphas:\n",
+        "    lasso.set_params(alpha=a)\n",
+        "    lasso.fit(x_train, y_train)\n",
+        "    pred_lasso = Lasso.predict(x_train,y_train)\n",
+        "    coefs_lasso.append(lasso.coef_)\n",
+        "  \n",
+        "  #=================for Elastic Net===================\n",
+        "  elastic_net = ElasticNet()\n",
+        "  coefs_elastic =[]\n",
+        "  # calculate the prediction\n",
+        "  for a in alphas:\n",
+        "    # Train the model\n",
+        "    elastic_net.set_params(alphas=a)\n",
+        "    elastic_net.fit(x_train, y_train)\n",
+        "    pred_elastic = elastic_net.predict(x_train,y_train)\n",
+        "    coefs_elastic.append(elastic_net.sparse_coef_)\n",
+        "\n",
+        "\n",
+        "  return {\n",
+        "      'ridge': {'alpha':alphas, 'pred':pred_ridge, 'coefficients':coefs_ridge},\n",
+        "      'Lasso': {'alpha':alphas, 'pred':pred_lasso, 'coefficients':coefs_lasso},\n",
+        "      'elastic_net': {'alpha':alphas, 'pred':pred_elastic, 'coefficients':coefs_elastic},\n",
+        "  }\n",
+        "\n"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        ""
+      ],
+      "metadata": {
+        "id": "UOYKDPqTpDoa"
+      },
+      "execution_count": null,
+      "outputs": []
+    }
+  ]
+}
